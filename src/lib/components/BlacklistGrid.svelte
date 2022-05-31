@@ -1,46 +1,37 @@
-﻿<script context="module">
-    import * as contentful from "contentful";
+﻿<script lang="ts">
+    import Spinner from "./Spinner.svelte";
 
-    const client = contentful.createClient({
-        space: "{{ spaceId }}",
-        accessToken: "{{ accessToken }}"
-    });
+    export let items = [];
+    export let isLoading = false;
 </script>
 
-<script lang="ts">
-    import {onMount} from "svelte";
+<table class="table w-full shadow-md rounded-2xl">
+    <thead>
+    <tr>
+        <th>Character name</th>
+        <th>Reason</th>
+        <th>Date</th>
+    </tr>
+    </thead>
+    <tbody>
 
-    let blacklists = [];
-    onMount(() => {
-        client.getEntries().then(response => {
-            console.log('response', response);
-            blacklists = [...response.items.map(item => item.fields)];
-        });
-    });
-    
-    $: console.log('bl', blacklists);
-</script>
-
-<div class="flex flex-col w-3/4 gap-4">
-    <div class="flex">
-        <input class="form-control input bg-base-200 w-full" placeholder="Search" />
-    </div>
-
-    <table class="table w-full shadow-md rounded-2xl">
-        <thead>
+    {#if isLoading}
         <tr>
-            <th>Character name</th>
-            <th>Reason</th>
-            <th>Date</th>
+            <td colspan="3" class="text-center">
+                <Spinner />
+            </td>
         </tr>
-        </thead>
-        <tbody>
-        {#each blacklists as blacklist}
+    {:else}
+        {#each items as item}
             <tr>
-                <td>{blacklist.characterName}</td>
-                <td>{blacklist.reason}</td>
-                <td>{new Date(blacklist.date).toDateString()}</td>
+                <td>{item.characterName}</td>
+                <td>{item.reason}</td>
+                <td>{new Date(item.date).toDateString()}</td>
+            </tr>
+        {:else}
+            <tr>
+                <td colspan="3" class="text-center">No items found</td>
             </tr>
         {/each}
-    </table>
-</div>
+    {/if}
+</table>
