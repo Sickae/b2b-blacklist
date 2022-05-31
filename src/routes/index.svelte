@@ -41,8 +41,7 @@
     
 </script>
 
-<div class="bg-base-300 shadow-md flex items-center p-3">
-    <img src="./b2b-logo.png" alt="Back2Basics Logo" id="b2b-logo" />
+<div class="bg-primary shadow-md flex items-center p-3">
     <h1 class="mx-5 text-center w-full">Back2Basics - Guild Blacklist</h1>
 </div>
 
@@ -56,6 +55,10 @@
         <BlacklistGrid {items} {isLoading} />
     </div>
 </div>
+
+<!--<footer class="footer footer-center mt-auto">-->
+<!--    <img src="./b2b-logo.png" alt="Back2Basics Logo" id="b2b-logo" />-->
+<!--</footer>-->
 
 <style>
     #b2b-logo {
