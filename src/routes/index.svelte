@@ -1,6 +1,6 @@
 <script context="module" lang="ts">
     async function loadItems(filter: string) {
-        const endpoint = filter?.length > 0 ? `/blacklist/${filter}.json` : '/blacklist.json';
+        const endpoint = `/blacklist/100/0/${filter}`;
         const res = await fetch(endpoint);
         
         return await res.json();
@@ -35,7 +35,7 @@
         };
     }
     
-    const processFilter = debounce(async (e) => {
+    const processFilter = debounce(async () => {
         await refreshItems();
     });
     
