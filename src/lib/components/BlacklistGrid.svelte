@@ -18,26 +18,30 @@
 <script lang="ts">
     import Spinner from "./Spinner.svelte";
     import {onMount} from "svelte";
-    import {ExclamationCircle, Icon} from "svelte-hero-icons";
+    import {EmojiSad, ExclamationCircle, Icon} from "svelte-hero-icons";
 
     export let pageSize = 10;
     
+    const pageSizeOptions = [2, 10, 25, 50, 100];
+    
     let filter = '';
     let pageIndex = 0;
-    let gridResult = loadGrid(filter, pageSize, pageIndex);
+    
+    $:gridResult = loadGrid(filter, pageSize, pageIndex);
+    $: totalCount = getCount(filter);
     
     onMount(async () => {
         await refreshGrid();
     });
 
     async function refreshGrid() {
-        const count = await getCount(filter);
+        const count = await totalCount;
         
         if (pageIndex * pageSize >= count) {
             pageIndex = Math.max(0, Math.ceil(count / pageSize) - 1);
         }
         
-        gridResult = loadGrid(filter, pageSize, pageIndex);
+        // gridResult = loadGrid(filter, pageSize, pageIndex);
     }
     
     function debounce(func, timeout = 300){
@@ -48,7 +52,8 @@
         };
     }
 
-    const processFilter = debounce(() => {
+    const processFilter = debounce((e) => {
+        filter = e.target.value;
         refreshGrid();
     });
     
@@ -72,7 +77,7 @@
 <div class="flex flex-col w-3/4 gap-4 m-5 items-center">
 
     <div class="flex gap-2 w-full">
-        <input bind:value={filter} on:keyup={processFilter} class="form-control input bg-base-200 w-full"
+        <input on:keyup={processFilter} class="form-control input bg-base-200 w-full"
                placeholder="Search" />
     </div>
 
@@ -101,39 +106,74 @@
                 </tr>
             {:else}
                 <tr>
-                    <td colspan="3" class="text-center">No items found</td>
+                    <td colspan="3" class="text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <Icon src="{EmojiSad}" solid size="2rem" />
+                            <p>No data found</p>
+                        </div>
+                    </td>
                 </tr>
             {/each}
         {:catch error}
             <tr>
                 <td colspan="3" class="text-center text-error">
-                    <div class="flex items-center justify-center gap-2">
-                        <Icon src="{ExclamationCircle}" solid size="2rem"></Icon>
-                        <p>{error.message}</p>
+                    <div class="alert alert-error flex items-center gap-2">
+                        <Icon src="{ExclamationCircle}" solid size="2rem"  />
+                        <p class="mx-auto">{error.message}</p>
                     </div>
                 </td>
             </tr>
         {/await}
     </table>
 
-    {#await gridResult}
-        <div class="btn-group">
-            <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title="<<" disabled readonly />
-            <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title="..." disabled readonly />
-            <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title=">>" disabled readonly />
+    <div class="flex justify-between w-full">
+        <div>
+            {#await totalCount then count}
+                {#await gridResult then result}
+                    <p>Showing {result.items.length} results of {count}</p>
+                {:catch error}
+                    <p>No result</p>
+                {/await}
+            {:catch error}
+                <p>No result</p>
+            {/await}
         </div>
-    {:then result}
-        <div class="btn-group">
-            <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title="<<" 
-                on:click={onClickPrevPage} />
-            
-            {#each Array(Math.ceil(result.total / pageSize)) as page, idx}
-                <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title="{idx + 1}" 
-                       checked="{idx == pageIndex}" on:click={() => handlePaging(idx)} />
-            {/each}
-            
-            <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title=">>"
-                on:click={onClickNextPage} />
+        
+        <div>
+            {#await gridResult}
+                <div class="btn-group">
+                    <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title="<<" disabled readonly />
+                    <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title="..." disabled readonly />
+                    <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title=">>" disabled readonly />
+                </div>
+            {:then result}
+                <div class="btn-group">
+                    <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title="<<" 
+                        on:click={onClickPrevPage} />
+                    
+                    {#each Array(Math.ceil(result.total / pageSize)) as page, idx}
+                        <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title="{idx + 1}" 
+                               checked="{idx === pageIndex}" on:click={() => handlePaging(idx)} />
+                    {/each}
+                    
+                    <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title=">>"
+                        on:click={onClickNextPage} />
+                </div>
+            {:catch error}
+                <div class="btn-group">
+                    <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title="<<" disabled readonly />
+                    <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title="..." disabled readonly />
+                    <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title=">>" disabled readonly />
+                </div>
+            {/await}
         </div>
-    {/await}
+        
+        <div>
+            <select class="select select-bordered" bind:value={pageSize}>
+                {#each pageSizeOptions as option}
+                    <option value="{option}">{option}</option>
+                {/each}
+            </select>
+        </div>
+    </div>
 </div>
