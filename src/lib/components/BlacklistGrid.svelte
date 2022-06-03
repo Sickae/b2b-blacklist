@@ -31,17 +31,15 @@
     $: totalCount = getCount(filter);
     
     onMount(async () => {
-        await refreshGrid();
+        await refreshPageIndex();
     });
 
-    async function refreshGrid() {
+    async function refreshPageIndex() {
         const count = await totalCount;
         
         if (pageIndex * pageSize >= count) {
             pageIndex = Math.max(0, Math.ceil(count / pageSize) - 1);
         }
-        
-        // gridResult = loadGrid(filter, pageSize, pageIndex);
     }
     
     function debounce(func, timeout = 300){
@@ -54,22 +52,22 @@
 
     const processFilter = debounce((e) => {
         filter = e.target.value;
-        refreshGrid();
+        refreshPageIndex();
     });
     
     function handlePaging(pageIdx: number) {
         pageIndex = pageIdx;
-        refreshGrid();
+        refreshPageIndex();
     }
     
     function onClickNextPage() {
         pageIndex++;
-        refreshGrid();
+        refreshPageIndex();
     }
     
     function onClickPrevPage() {
         pageIndex--;
-        refreshGrid();
+        refreshPageIndex();
     }
     
 </script>
@@ -149,7 +147,7 @@
             {:then result}
                 <div class="btn-group">
                     <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title="<<" 
-                        on:click={onClickPrevPage} />
+                        on:click={onClickPrevPage} disabled="{pageIndex === 0}" />
                     
                     {#each Array(Math.ceil(result.total / pageSize)) as page, idx}
                         <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title="{idx + 1}" 
@@ -157,7 +155,7 @@
                     {/each}
                     
                     <input type="radio" name="page-options" class="btn bg-base-300 border-base-300" data-title=">>"
-                        on:click={onClickNextPage} />
+                        on:click={onClickNextPage} disabled="{pageIndex === Math.floor(result.total / pageSize)}" />
                 </div>
             {:catch error}
                 <div class="btn-group">
@@ -169,7 +167,7 @@
         </div>
         
         <div>
-            <select class="select select-bordered" bind:value={pageSize}>
+            <select class="select select-bordered" bind:value={pageSize} on:change={refreshPageIndex}>
                 {#each pageSizeOptions as option}
                     <option value="{option}">{option}</option>
                 {/each}
