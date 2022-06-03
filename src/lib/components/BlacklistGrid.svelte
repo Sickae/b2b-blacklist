@@ -18,7 +18,7 @@
 <script lang="ts">
     import Spinner from "./Spinner.svelte";
     import {onMount} from "svelte";
-    import {EmojiSad, ExclamationCircle, Icon} from "svelte-hero-icons";
+    import {EmojiSad, ExclamationCircle, Icon, Search} from "svelte-hero-icons";
 
     export let pageSize = 10;
     
@@ -74,17 +74,22 @@
 
 <div class="flex flex-col w-3/4 gap-4 m-5 items-center">
 
-    <div class="flex gap-2 w-full">
-        <input on:keyup={processFilter} class="form-control input bg-base-200 w-full"
-               placeholder="Search" />
+    <div class="flex gap-2 w-full items-center relative">
+        <div class="pointer-events-none w-8 h-8 absolute top-1/2 transform -translate-y-1/2 left-3">
+            <Icon src="{Search}" solid size="2rem" />
+        </div>
+    
+        <input id="search" on:keyup={processFilter} class="form-control input input-bordered bg-base-200 w-full pl-14"
+           placeholder="Search" />
+        
     </div>
 
-    <table class="table w-full shadow-md rounded-2xl">
+    <table class="table table-zebra w-full shadow-md rounded-2xl">
         <thead>
         <tr>
-            <th>Character name</th>
-            <th>Reason</th>
-            <th>Date</th>
+            <th class="bg-primary text-white">Character name</th>
+            <th class="bg-primary text-white">Reason</th>
+            <th class="bg-primary text-white">Date</th>
         </tr>
         </thead>
         <tbody>
